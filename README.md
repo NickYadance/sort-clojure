@@ -12,6 +12,11 @@
 # Sort Clojure Namespaces
 A simple python script to sort require namespaces in alphabetic order of clojure source file.
 
+# How to run 
+```bash
+python sort.py /path/to/clojure/directories
+```
+
 * Before sorting
 ```clojure
 (ns example
