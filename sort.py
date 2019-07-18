@@ -15,10 +15,12 @@ def get_ns_and_sort(filename):
         line = file.readline()
         while line:
             if require_start_pattern.match(line):
-                while namespace_pattern.search(line) \
-                        and not require_end_pattern.match(line):
+                while namespace_pattern.search(line):
                     ns.append(namespace_pattern.search(line).group(0))
-                    line = file.readline()
+                    if require_end_pattern.match(line):
+                        break
+                    else:
+                        line = file.readline()
                 ns.sort()
                 replace(filename, ns)
                 return
@@ -33,8 +35,7 @@ def replace(filename, ns):
             if require_start_pattern.match(line):
                 ns_count = 0
                 while namespace_pattern.search(line) \
-                        and ns_count < len(ns) \
-                        and not require_end_pattern.match(line):
+                        and ns_count < len(ns):
                     replace_line = re.sub("\[.*]", ns[ns_count], line)
                     print(replace_line, end="")
                     ns_count = ns_count + 1
