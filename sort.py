@@ -3,7 +3,8 @@ import fileinput
 import os
 import sys
 
-require_pattern = re.compile("\s*\(:require.*")
+require_start_pattern = re.compile("\s*\(:require.*")
+require_end_pattern = re.compile(".*\)")
 namespace_pattern = re.compile("\[.*]")
 clj_filename_pattern = ".clj"
 
@@ -13,8 +14,9 @@ def get_ns_and_sort(filename):
     with open(filename, "r") as file:
         line = file.readline()
         while line:
-            if require_pattern.match(line):
-                while namespace_pattern.search(line):
+            if require_start_pattern.match(line):
+                while namespace_pattern.search(line) \
+                        and not require_end_pattern.match(line):
                     ns.append(namespace_pattern.search(line).group(0))
                     line = file.readline()
                 ns.sort()
@@ -28,9 +30,11 @@ def replace(filename, ns):
     with fileinput.FileInput(filename, inplace=True) as file:
         line = file.readline()
         while line:
-            if require_pattern.match(line):
+            if require_start_pattern.match(line):
                 ns_count = 0
-                while namespace_pattern.search(line) and ns_count < len(ns):
+                while namespace_pattern.search(line) \
+                        and ns_count < len(ns) \
+                        and not require_end_pattern.match(line):
                     replace_line = re.sub("\[.*]", ns[ns_count], line)
                     print(replace_line, end="")
                     ns_count = ns_count + 1
