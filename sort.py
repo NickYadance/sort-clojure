@@ -28,7 +28,7 @@ def get_ns_and_sort(filename):
 
 
 def replace(filename, ns):
-    print(filename, ": rewriting [", len(ns), "] namespaces")
+    newns = []
     with fileinput.FileInput(filename, inplace=True) as file:
         line = file.readline()
         while line:
@@ -36,12 +36,24 @@ def replace(filename, ns):
                 ns_count = 0
                 while namespace_pattern.search(line) \
                         and ns_count < len(ns):
+                    newns.append(namespace_pattern.search(line).group(0))
                     replace_line = re.sub("\[.*]", ns[ns_count], line)
                     print(replace_line, end="")
                     ns_count = ns_count + 1
                     line = file.readline()
             print(line, end="")
             line = file.readline()
+    d = differ(ns, newns)
+    if d > 0:
+        print(filename, ": rewriting [", d, "] namespaces")
+
+
+def differ(ns1, ns2):
+    c = 0
+    for k, v in enumerate(ns1):
+        if v != ns2[k]:
+            c = c + 1
+    return c
 
 
 def handle(dirname):
